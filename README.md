@@ -1,2 +1,30 @@
-# a-solovey_platform
-a-solovey Platform repository
+# Выполнено ДЗ № 2 (controllers)
+
+- Основное ДЗ
+- Задание со *
+
+## В процессе сделано:
+1. Создание frontend-replicaset.yaml. При изменении образа не происходит обновления подов, т.к. репликасет следит в первую очередь за количеством подов, если количество удовлетворяет условиям, то обновления не происходит, для обновления при внесении изменений нужно использовать деплоймент.
+2. Созданы образы для paymentservice, paymentservice-replicaset.yaml и paymentservice-deployment.yaml, с деплоймент проверены обновление и откат
+3. Созданы paymentservice-deployment-bg.yaml и paymentservice-deployment-reverse.yaml для реализации других стратегий развертывания.
+4. Создан frontend-deployment.yaml с добавлением readinessProbe по примеру.
+5. Создан node-exporter-daemonset.yaml для развертывания DaemonSet с NodeExporter, реализован запуск на всех нодах, включая мастер-ноды, через добавление tolerations.
+
+
+## Как запустить проект:
+1. Выполняется kubectl apply -f frontend-replicaset.yaml.
+2. Выполняется kubectl apply -f paymentservice-deployment.yaml, при изменении тега образа с v0.0.1 на v0.0.2 и повторном запуске команды происходит обновление.
+3.1. Выполняется kubectl apply -f paymentservice-deployment-bg.yaml, при изменении тега образа и повторном запуске команды происходит обновление по сценарию: сначала развертывание трех новых подов, потом удаление трех старых.
+3.2. Выполняется kubectl apply -f paymentservice-deployment-reverse.yaml, при изменении тега образа и повторном запуске команды происходит обновление по сценарию: сначала удаление одного старого пода, потом запуск одного нового и т.д.
+4. Выполняется kubectl apply -f frontend-deployment.yaml.
+5. Выполняется kubectl apply -f node-exporter-daemonset.yaml.
+
+## Как проверить работоспособность:
+1. Запускаются 3 пода приложения frontend
+2. Запускаются 3 пода приложения payment
+3. Поды развертываются по заявленным выше сценариям
+4. В описании подов после развертывания видно readinessProbe, при нарушении синтаксиса описания пробы и, например, попытке развертывания из образа с другим тегом, развертывание остановится на попытке запуска первого пода, которое не будет завершаться успешно. Проверить можно командой kubectl rollout status deployment/frontend, выполнить откат командой kubectl rollout undo deployment/frontend.
+5. Выполнив запуск, можно увидеть, что запущено по одному поду на каждой ноде, при пробросе порта kubectl port-forward <имя любого pod в DaemonSet> 9100:9100 метрики будут в localhost:9100/metrics.
+
+## PR checklist:
+ - [ ] Выставлен label с темой домашнего задания
