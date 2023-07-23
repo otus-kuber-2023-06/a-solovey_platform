@@ -46,3 +46,32 @@
 4. В описании подов после развертывания видно readinessProbe, при нарушении синтаксиса описания пробы и, например, попытке развертывания из образа с другим тегом, развертывание остановится на попытке запуска первого пода, которое не будет завершаться успешно. Проверить можно командой kubectl rollout status deployment/frontend, выполнить откат командой kubectl rollout undo deployment/frontend.
 5. Выполнив запуск, можно увидеть, что запущено по одному поду на каждой ноде, при пробросе порта kubectl port-forward <имя любого pod в DaemonSet> 9100:9100 метрики будут в localhost:9100/metrics.
 
+
+# Выполнено ДЗ № 3 (networks)
+
+- Основное ДЗ
+- Задание со * (частично)
+
+## В процессе сделано:
+1. Добавлен корректный web-pod.yaml с пробами. Вопрос почему констуркция в пробе с проверкой командой "ps aux | grep my_web_server_process" не имеет смысла - т.к. всегда будет положительный ответ из-за наличия самого процесса grep в результате.
+2. Добавлен деплоймент web-deploy.yaml с тремя репликами и пробами.
+3. Добавлен web-svc-cip.yaml для создания Service типа ClusterIP
+4. Настроен IPVS, установлен MetalLB по методичке и с помощью манифеста metallb-config.yaml, создан Service типа LoadBalancer через web-svc-lb.yaml, добавлен маршрут в ОС.
+5. Создан Ingress через nginx-lb.yaml и с использованием MetalLb, приложение web подключено к Ingress через web-svc-headless.yaml, создано правило через web-ingress.yaml.
+6. Попробовал сделать Ingress для Dashboard из официального манифеста плюс dashboard.yaml
+
+## Как запустить проект:
+1. Выполняется kubectl apply -f web-pod.yaml
+2. Выполняется kubectl apply -f web-deploy.yaml
+3. Выполняется kubectl apply -f web-svc-cip.yaml
+4. IPVS по методичке, MetalLB аналогчино, далее запуск через kubectl apply -f metallb-config.yaml, kubectl apply -f web-svc-lb.yaml
+5. Применяются манифесты nginx-lb.yaml, web-svc-headless.yaml, web-ingress.yaml
+6. После настройки Dashboard применить dashboard.yaml
+
+## Как проверить работоспособность:
+1. Корректный статус пода после запуска.
+2. Корректный статус запуска деплоймента и подов.
+3. Появляется Service web-svc-cip с Cluster-IP.
+4. В kube-ipvs0 появляется ip-адрес, после установки MetalLB корректные статусы всех объектов, после применения web-svc-lb.yaml и добавления маршрута, страница отвечает через EXTERNAL-IP - curl http://172.17.255.1.
+5. Service ingress-nginx получил EXTERNAL-IP, приложения отвечает через curl http://172.17.255.2/index.html.
+6. Вроде бы отвечает страница к приложению через /dashboard - curl http://172.17.255.2/dashboard.
