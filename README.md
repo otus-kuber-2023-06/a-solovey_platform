@@ -75,3 +75,23 @@
 4. В kube-ipvs0 появляется ip-адрес, после установки MetalLB корректные статусы всех объектов, после применения web-svc-lb.yaml и добавления маршрута, страница отвечает через EXTERNAL-IP - curl http://172.17.255.1.
 5. Service ingress-nginx получил EXTERNAL-IP, приложения отвечает через curl http://172.17.255.2/index.html.
 6. Вроде бы отвечает страница к приложению через /dashboard - curl http://172.17.255.2/dashboard.
+
+# Выполнено ДЗ № 4 (volumes)
+
+- Основное ДЗ
+- Задание со * 
+
+## В процессе сделано:
+1. В кластере kind созданы minio-statefulset.yaml и minio-headlessservice.yaml
+2. Добавлен my-secret.yaml с секретом и обновленный с учетом секрета minio-statefulset-secret.yaml
+3. Созданы PV типа hostPath, PVC, pod, выполнена запись в файл в смонтированную директорию внутри пода, затем удаление пода, создание второго к тому же PVC и проверка сохранения информации в файле
+
+## Как запустить проект:
+1. Выполняется kubectl apply -f minio-statefulset.yaml и kubectl apply -f minio-headlessservice.yaml
+2. Применить манифест с секретом и обновленный манифест с statefulset Minio
+3. Применить my-pv.yaml, my-pvc.yaml, my-pod.yaml, записать в файл внутри пода текст, удалить под и создать второй my-pod-2.yaml
+
+## Как проверить работоспособность:
+1. В кластере есть pv, pvs, statefulset, pod с Minio
+2. Корректная работа аналогично пункту 1, плюс появился secret
+3. После создания первого пода выполняется kubectl exec -it my-pod -- /bin/bash, затем echo "Hello Kub-ik" > /app/data/data.txt, после удаления первого пода и создания второго внутри него выполняется проверка текста в файле cat /app/data/data.txt
