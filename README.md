@@ -95,3 +95,23 @@
 1. В кластере есть pv, pvs, statefulset, pod с Minio
 2. Корректная работа аналогично пункту 1, плюс появился secret
 3. После создания первого пода выполняется kubectl exec -it my-pod -- /bin/bash, затем echo "Hello Kub-ik" > /app/data/data.txt, после удаления первого пода и создания второго внутри него выполняется проверка текста в файле cat /app/data/data.txt
+
+# Выполнено ДЗ № 5 (security)
+
+- Основное ДЗ
+- Задание со * 
+
+## В процессе сделано:
+1. task01 - создан Service Account bob с ролью admin (cluster-admin) в рамках всего кластера и Service Account dave без доступа к кластеру
+2. task02 - создан Namespace prometheus, Service Account carol в этом Namespace, всем Service Account в Namespace prometheus выданы права на get, list, watch в отношении Pods всего кластера
+3. task03 - создан Namespace dev, Service Account jane в Namespace dev, jane выдана роль admin в рамках Namespace dev, создан Service Account ken в Namespace dev, ken выдана роль view в рамках Namespace dev 
+
+## Как запустить проект:
+1. Применить по очереди манифесты из папки task01
+2. Применить по очереди манифесты из папки task02
+3. Применить по очереди манифесты из папки task03
+
+## Как проверить работоспособность:
+1. Есть права админа на кластер с Service Account bob и нет никаких с Service Account dave
+2. У всех Service Account в Namespace prometheus (например, carol) есть права на get, list, watch в отношении Pods всего кластера
+3. У Service Account jane есть роль admin в рамках Namespace dev, у Service Account ken есть роль view в рамках Namespace dev
